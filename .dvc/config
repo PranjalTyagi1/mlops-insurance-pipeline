@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = E:\datasets\insurance-dataset
+    url = s3://mlops-insurance-data-pranjaltyagi

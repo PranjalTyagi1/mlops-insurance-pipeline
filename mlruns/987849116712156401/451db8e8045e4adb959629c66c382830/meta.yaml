@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/prsdm/OneDrive/Desktop/ml-project/mlruns/987849116712156401/451db8e8045e4adb959629c66c382830/artifacts
+end_time: 1762358078104
+entry_point_name: ''
+experiment_id: '987849116712156401'
+lifecycle_stage: active
+run_id: 451db8e8045e4adb959629c66c382830
+run_name: nebulous-pig-941
+run_uuid: 451db8e8045e4adb959629c66c382830
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762358073182
+status: 4
+tags: []
+user_id: admin

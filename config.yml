@@ -8,11 +8,14 @@ train:
   shuffle: true
 
 model:
-  name: DecisionTreeClassifier
+  name: RandomForestClassifier
   params:
-    criterion: entropy
-    max_depth: null
+    n_estimators: 150
+    max_depth: 10
+    random_state: 42
   store_path: models/
+
+
 
   # name: GradientBoostingClassifier
   # params:

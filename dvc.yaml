@@ -1,0 +1,21 @@
+stages:
+  clean:
+    cmd: python steps/clean.py --train_in data/train.csv --test_in data/test.csv
+      --train_out artifacts/clean/train_clean.csv --test_out 
+      artifacts/clean/test_clean.csv
+    deps:
+    - data/test.csv
+    - data/train.csv
+    - steps/clean.py
+    outs:
+    - artifacts/clean/test_clean.csv
+    - artifacts/clean/train_clean.csv
+  train:
+    cmd: python steps/train.py --train artifacts/clean/train_clean.csv --test 
+      artifacts/clean/test_clean.csv --model_out models/model.pkl
+    deps:
+    - artifacts/clean/test_clean.csv
+    - artifacts/clean/train_clean.csv
+    - steps/train.py
+    outs:
+    - models/model.pkl

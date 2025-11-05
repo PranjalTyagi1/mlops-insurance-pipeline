@@ -1,0 +1,72 @@
+name: MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  mlops-pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      DVC_REMOTE: myremote
+
+    steps:
+      # Checkout your code
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v3
+
+      # Setup Python
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Install Dependencies
+      - name: 📦 Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install dvc[s3] pytest imbalanced-learn joblib boto3 pyyaml
+
+      # Pull data + model from S3 using DVC
+      - name: ☁️ Pull Data and Model from DVC Remote
+        run: |
+          dvc pull -r $DVC_REMOTE
+
+      # Run Tests
+      - name: 🧪 Run Unit Tests
+        run: |
+          pytest -v --maxfail=1 --disable-warnings
+
+      # Run DVC Pipeline
+      - name: ⚙️ Run DVC Pipeline
+        run: |
+          dvc repro
+
+      # Push updated artifacts and metrics to S3
+      - name: ☁️ Push Updated Data/Model to Remote
+        run: |
+          dvc push -r $DVC_REMOTE
+
+      # Commit metrics and model updates
+      - name: 💾 Commit Metrics and Lockfile
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add dvc.lock metrics.json
+          git commit -m "Auto-update metrics and model [skip ci]" || echo "No changes to commit"
+
+      # (Optional) Build and Push Docker Image
+      - name: 🐳 Build and Push Docker Image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker build -f Dockerfile.api -t ${{ secrets.DOCKERHUB_USERNAME }}/mlops-model-api:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mlops-model-api:latest
