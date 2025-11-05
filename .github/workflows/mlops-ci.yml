@@ -20,7 +20,7 @@ jobs:
     steps:
       # Checkout your code
       - name: 🧾 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/cache@v4
 
       # Setup Python
       - name: 🐍 Setup Python
