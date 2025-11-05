@@ -1,0 +1,49 @@
+schema: '2.0'
+stages:
+  clean:
+    cmd: python steps/clean.py --train_in data/train.csv --test_in data/test.csv
+      --train_out artifacts/clean/train_clean.csv --test_out 
+      artifacts/clean/test_clean.csv
+    deps:
+    - path: data/test.csv
+      hash: md5
+      md5: 7ae269663ed36d7f0452df1344eaa2ed
+      size: 6153161
+    - path: data/train.csv
+      hash: md5
+      md5: ca815c589c01c9a97334318085d78cdc
+      size: 6153946
+    - path: steps/clean.py
+      hash: md5
+      md5: 34f2664741311ec327251701c4e78b25
+      size: 2659
+    outs:
+    - path: artifacts/clean/test_clean.csv
+      hash: md5
+      md5: a87d7ad1a49a81dd8ed2aaddaca83dfb
+      size: 8096723
+    - path: artifacts/clean/train_clean.csv
+      hash: md5
+      md5: fd08b30dd0fecc353d6bd340842c3fbf
+      size: 8103855
+  train:
+    cmd: python steps/train.py --train artifacts/clean/train_clean.csv --test 
+      artifacts/clean/test_clean.csv --model_out models/model.pkl
+    deps:
+    - path: artifacts/clean/test_clean.csv
+      hash: md5
+      md5: a87d7ad1a49a81dd8ed2aaddaca83dfb
+      size: 8096723
+    - path: artifacts/clean/train_clean.csv
+      hash: md5
+      md5: fd08b30dd0fecc353d6bd340842c3fbf
+      size: 8103855
+    - path: steps/train.py
+      hash: md5
+      md5: ed05dad9e6918568b8300483ea84de0b
+      size: 3463
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 7a50f66e57392afc90adea093fcdd640
+      size: 4061396
