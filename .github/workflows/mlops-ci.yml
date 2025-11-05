@@ -18,52 +18,61 @@ jobs:
       DVC_REMOTE: myremote
 
     steps:
-      # Checkout your code
+      # ✅ Correct step: clone your repository
       - name: 🧾 Checkout Repository
-        uses: actions/cache@v4
+        uses: actions/checkout@v4
 
-      # Setup Python
+      # 🐍 Setup Python environment
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # Install Dependencies
+      # ⚡ (Optional) Cache pip dependencies for faster installs
+      - name: ⚡ Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 📦 Install project dependencies
       - name: 📦 Install Dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install dvc[s3] pytest imbalanced-learn joblib boto3 pyyaml
 
-      # Pull data + model from S3 using DVC
+      # ☁️ Pull data + model from S3 using DVC
       - name: ☁️ Pull Data and Model from DVC Remote
         run: |
           dvc pull -r $DVC_REMOTE
 
-      # Run Tests
+      # 🧪 Run your test suite
       - name: 🧪 Run Unit Tests
         run: |
           pytest -v --maxfail=1 --disable-warnings
 
-      # Run DVC Pipeline
+      # ⚙️ Reproduce DVC pipeline
       - name: ⚙️ Run DVC Pipeline
         run: |
           dvc repro
 
-      # Push updated artifacts and metrics to S3
+      # ☁️ Push updated artifacts and metrics to S3
       - name: ☁️ Push Updated Data/Model to Remote
         run: |
           dvc push -r $DVC_REMOTE
 
-      # Commit metrics and model updates
+      # 💾 Commit updated metrics or lock files
       - name: 💾 Commit Metrics and Lockfile
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add dvc.lock metrics.json
+          git add dvc.lock metrics.json || true
           git commit -m "Auto-update metrics and model [skip ci]" || echo "No changes to commit"
 
-      # (Optional) Build and Push Docker Image
+      # 🐳 Build and push Docker image to Docker Hub
       - name: 🐳 Build and Push Docker Image
         if: github.ref == 'refs/heads/main'
         run: |
